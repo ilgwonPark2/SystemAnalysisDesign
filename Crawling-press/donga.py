@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 from urllib.request import Request, urlopen
-from datetime import date, timedelta
-from datetime import datetime
+from datetime import date, timedelta, datetime
 import time
 import urllib
 import sys
@@ -28,13 +27,6 @@ def getText(link):
 	content = content_tag.text.strip()
 
 	return header, date, content
-
-
-
-
-
-	
-
 
 if __name__ == '__main__':
 	d2 = date.today()
