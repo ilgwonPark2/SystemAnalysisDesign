@@ -7,7 +7,7 @@ import urllib
 import sys
 
 
-def donga(link):
+def getText(link):
 	req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
 	webpage = urlopen(req).read()
 	soup = BeautifulSoup(webpage, 'html.parser')
@@ -53,7 +53,7 @@ if __name__ == '__main__':
 			tag = i.findAll("a")[0]
 			for a in tag.findAll(True):
 				a.extract()
-			header, date, content = donga(tag.get("href"))
+			header, date, content = getText(tag.get("href"))
 			# 데이트가 범위 밖에 벗어나면 아예 종료 되는 코드 여기에 작성
 			timestamp = time.mktime(datetime.strptime(date, '%Y-%m-%d %H:%M').timetuple())
 			if(timestamp < criteria):
