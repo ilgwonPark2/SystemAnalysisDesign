@@ -1,0 +1,456 @@
+interface test
+  port : 4000
+  type : "http server"
+exit
+
+
+interface:
+  ui:
+    attribute:
+      port: 4000
+      type: "http server"
+
+    event:
+      /#: File.read! "/home/cloudera/interactor/webserver/index.html"
+      /test: "test"
+
+property:
+  dir: cwd() <> "/ui/dist"
+
+function:
+  /api/get/activity: |
+    solution = $1["body"]["solution"]
+    function "success", [get_activity(solution)]
+
+  /api/test: function "success", [$2]
+
+  error: |
+    log "error", $1
+    %{"status" => "error", "result" => $1}
+  success: %{"status" => "success", "result" => $1}
+
+
+  interface:
+    ui:
+      attribute:
+        port: 4000
+        type: "http server"
+
+      event:
+        /#: File.read! "#{@dir}/index.html"
+
+        /api/#: |
+          log($data["path"])
+          body = unless $data["body"] == "", do: $data["body"] |> from_json!(), else: %{}
+          user = function "cookie", "authenticate", [$data["headers"]["cookie"], @cookie]
+          if user do
+            cookie = function "cookie", "renewCookie", [$data["headers"]["cookie"], @cookie, @cookie_duration]
+            setp("response", %{"headers" => %{"set-cookie" => [cookie]}})
+            try do
+              function $data["path"], [$data |> Map.put("body", body), user]
+            rescue
+              error ->
+                log error
+                function "error", ["api error"]
+            end
+          else
+            function "error", ["no credentials"]
+          end
+        /api/add_first_user: |
+          if get_users() == [] do
+            body = unless $data["body"] == "", do: $data["body"] |> from_json!(), else: %{}
+            add_user(body["username"], body["password"])
+            command("admin save")
+            function "success", ["User added"]
+          else
+            function "error", ["Cannot add first user when users already exist"]
+          end
+        /api/is_first_user: function "success", [get_users() == []]
+        /api/login: |
+          body = unless $data["body"] == "", do: $data["body"] |> from_json!(), else: %{}
+          if authenticate(body["username"], body["password"]) do
+            cookie = function "cookie", "newCookie", [body["username"], @cookie, @cookie_duration]
+            setp("response", %{"headers" => %{"set-cookie" => [cookie]}})
+            function "success", [body["username"]]
+          else
+            function "error", ["invalid"]
+          end
+        /api/logout: |
+          cookie = function "cookie", "endCookie", [$data["headers"]["cookie"], @cookie]
+          setp("response", %{"headers" => %{"set-cookie" => [cookie]}})
+          function "success", ["logged out"]
+        /static/#: File.read! String.replace(@dir <> $data["path"], "../", "")
+        /test: "test"
+
+  property:
+    dir: cwd() <> "/ui/dist"
+    cookie: "INTERACTOR_SESSION_ID"
+    cookie_duration: 6000
+
+  function:
+    /api/get/activity: |
+      solution = $1["body"]["solution"]
+      function "success", [get_activity(solution)]
+    /api/get/admin: function "success", [hd(command "admin show")]
+    /api/get/clearComponent: |
+      menu = $1["body"]["menu"]
+      id = $1["body"]["id"]
+      mode = $1["body"]["mode"]
+      command "#{menu} #{id} clear #{mode}"
+      function "success", [""]
+    /api/get/clearLog: |
+      solution = $1["body"]["solution"]
+      command "solution #{solution} clear log"
+      function "success", ["Log cleared."]
+    /api/get/clearSystemLog: |
+      command "clear system log"
+      function "success", ["Log cleared."]
+    /api/get/command: |
+      menu = $1["body"]["menu"]
+      id = $1["body"]["id"]
+      cmd = $1["body"]["command"]
+      command("#{menu} #{id} #{cmd}") |> Enum.at(0) |> String.replace("<pre>", "")
+    /api/get/config: |
+      path = $1["body"]["path"]
+      version = $1["body"]["version"]
+      result = get_config(path, version)
+      function "success", [result]
+    /api/get/deleteComponent: |
+      menu = $1["body"]["menu"]
+      id = $1["body"]["id"]
+      mode = $1["body"]["mode"]
+      command "#{menu} #{id} clear config #{mode}"
+      function "success", [""]
+    /api/get/debug: |
+      solution = $1["body"]["solution"]
+      cleanup = command "solution #{$_[:ws]} clear debug function #{$_[:id]}"
+      result = get_debug(solution)
+      function "success", [result]
+    /api/get/enterCommit: |
+      menu = $1["body"]["menu"]
+      id = $1["body"]["id"]
+      name = $1["body"]["name"]
+      commit = if name != nil do
+        command("#{menu} #{id} commit as #{name}") |> Enum.at(0)
+      else
+        command("#{menu} #{id} commit") |> Enum.at(0)
+      end
+      if String.starts_with? commit, "Committed version" do
+       function "success", [commit]
+      else
+       function "error", [commit]
+      end
+    /api/get/interfaceStatus: function "success", [get_interface_status($1["body"]["solution"])]
+    /api/get/licenseInfo: function "success", [hd(command "admin show license")]
+    /api/get/log: |
+      solution = $1["body"]["solution"]
+      result = command("solution #{solution} show log")
+        |> Enum.at(0)
+        |> String.split(~r/\r?\n(?=\d{4}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2}\s>\s)/)
+        |> Enum.reverse()
+      result = for line <- result, do: String.trim(line, "\r\n")
+      function "success", [result]
+    /api/get/logStatus: |
+      solution = $1["body"]["solution"]
+      result = command("solution #{solution} show log status") |> Enum.at(0)
+      function "success", [result]
+    /api/get/menus: |
+      response = command(["show solutions","show protocols"])
+      solutions = response |> Enum.at(1) |> String.split("\r\n")
+        |> Enum.filter(fn(item) -> item != "" end)
+      protocols = response |> Enum.at(0) |> String.split("\r\n")
+        |> Enum.filter(fn(item) -> item != "" end)
+      function "success", [%{"solution" => solutions, "protocol" => protocols}]
+    /api/get/connectionStatus: function "success", [get_connection_status($1["body"]["solution"])]
+    /api/get/systemLog: |
+      result = command("show system log")
+        |> Enum.at(0)
+        |> String.split(~r/\r?\n(?=\d{4}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2}\s>\s)/)
+        |> Enum.reverse()
+      result = for line <- result, do: String.trim(line, "\r\n")
+      function "success", [result]
+    /api/get/systemLogStatus: |
+      result = command("show system log status") |> Enum.at(0)
+      function "success", [result]
+    /api/get/timerStatus: function "success", [get_timer_status($1["body"]["solution"])]
+    /api/get/validateLicense: |
+      command "validate license"
+      function "success", [""]
+    /api/get/variables: function "success", [get_vars($1["body"]["solution"])]
+    /api/get/version: |
+      with menu when menu != nil and menu != "" <- $1["body"]["menu"],
+           id   when id   != nil and id   != "" <- $1["body"]["id"] do
+        function "success", [
+          command("#{menu} #{id} show version") |> Enum.at(0) |> String.split("\r\n")
+        ]
+      else
+        _error ->
+          log "get/version failure on: menu: #{$1["body"]["menu"]} id: #{$1["body"]["id"]}"
+          function "error", ["Invalid menu name or id"]
+      end
+    /api/run: |
+      solution = $1["body"]["solution"]
+      logic = $1["body"]["logic"]
+      result = command("solution #{solution} run #{logic}") |> Enum.at(0)
+      if result |> String.contains?("MatchError") do
+       function "error", [result]
+      else
+       function "success", [result]
+      end
+    /api/set/SystemName: |
+      systemName = (Map.get($1, "body") |> Map.get("systemName"))
+      command "admin system name #{systemName}"
+      command "admin save"
+      function "success", ["System name is changed."]
+    /api/set/activityStatus: |
+      type = $1["body"]["type"]
+      case type do
+        "enable" ->
+          command "admin activity enabled"
+          command "admin save"
+          function "success", ["activityStatus is enabled"]
+        "disable" ->
+          command "admin activity disabled"
+          command "admin save"
+          function "success", ["activityStatus is disabled"]
+      end
+    /api/set/adminLogStatus: |
+      type = $1["body"]["type"]
+      case type do
+        "enable" ->
+          command "admin log enabled"
+          command "admin save"
+          function "success", ["Admin log is enabled"]
+        "disable" ->
+          command "admin log disabled"
+          command "admin save"
+          function "success", ["Admin log is disabled"]
+      end
+    /api/set/component: |
+      solution = $1["body"]["solution"]
+      component = $1["body"]["component"]
+      names = $1["body"]["name"]
+      type = $1["body"]["type"]
+      try do
+        for name <- names do
+          command("solution #{solution} #{type} #{component} #{name}")
+          function "success", ["success"]
+        end
+      rescue
+        error ->
+          log error
+          function "error", ["api error"]
+      end
+    /api/set/config: |
+      menu = $1["body"]["menu"]
+      id = $1["body"]["id"]
+      case id do
+        "ui" when menu == "solution" ->
+          function "error", ["ui configuration change is not allowed."]
+       "connection" when menu == "solution" ->
+          function "error", ["connection configuration change is not allowed."]
+        _ ->
+          config = $1["body"]["config"] |> YamlEncoder.encode()
+          previous_config = command("#{menu} #{id} show config") |> Enum.at(0)
+          result = command(
+            "#{menu} #{id}\n"
+            <> "configure\n"
+            <> config
+            <> "\nexit"
+          ) |> Enum.at(0)
+          if result == ":ok" do
+            if String.contains? result, "No matching command for" do
+              log "configuration error"
+              function "error", ["configuration is incorrect. Check Again."]
+            else
+              function "success", [""]
+            end
+          else
+            command(
+              "#{menu} #{id}\n"
+              <> "clear config\n"
+              <> "configure\n"
+              <> previous_config
+              <> "\nexit"
+            )
+            function "error", [result]
+          end
+      end
+    /api/set/controlVersion: |
+      menu = $1["body"]["menu"]
+      id = $1["body"]["id"]
+      version = $1["body"]["version"] |> String.replace(~r/\N\(compiled\)\N?|\N?\(running\)\N?/,"")
+      type = $1["body"]["type"]
+      result = command("#{menu} #{id} #{type} version #{version}") |> Enum.at(0)
+      if type == "show" do
+        log "success"
+        function "success", [result]
+      else
+        if String.contains? result, version do
+          log "success"
+          function "success", [result]
+        else
+          log "error"
+          function "error", [result]
+        end
+      end
+    /api/set/debugStatus: |
+      type = $1["body"]["type"]
+      case type do
+        "enable" ->
+          command "admin debug enabled"
+          command "admin save"
+          function "success", ["debugStatus is enabled"]
+        "disable" ->
+          command "admin debug disabled"
+          command "admin save"
+          function "success", ["debugStatus is disabled"]
+      end
+    /api/set/enterNewConfig: |
+      menu = $1["body"]["menu"]
+      id = $1["body"]["id"]
+      case id do
+        "ui" when menu == "solution" ->
+          function "error", ["ui configuration change is not allowed."]
+       "connection" when menu == "solution" ->
+          function "error", ["connection configuration change is not allowed."]
+        _ ->
+           keys = $1["body"]["keys"]
+           {prefix, indent} = keys |> Enum.reduce({"", ""}, fn(key, {prefix, indent}) ->
+              {prefix <> indent <> key <> ": \r\n", indent <> "  "}
+           end)
+           previous_config = command("#{menu} #{id} show config #{Enum.join(keys, " ")}") |> Enum.at(0)
+           config = $1["body"]["config"] |> String.replace(~r/\r?\n/, "\r\n" <> indent)
+           result = command(
+             "#{menu} #{id}\n"
+             <> "clear config #{Enum.join(keys, " ")}\n"
+             <> "configure\n"
+             <> prefix
+             <> indent <> config
+             <> "\nexit"
+           ) |> Enum.at(0)
+           if result == ":ok" do
+             if String.contains? result, "No matching command for" do
+               log "configuration error"
+               function "error", ["configuration is incorrect. Check Again."]
+             else
+               function "success", [""]
+             end
+           else
+             command(
+               "#{menu} #{id}\n"
+               <> "configure\n"
+               <> prefix
+               <> indent <> previous_config
+               <> "\nexit"
+              )
+             function "error", [result]
+          end
+      end
+    /api/set/license: |
+      licenseId = $1["body"]["licenseId"]
+      licenseKey = $1["body"]["licenseKey"]
+      result = hd(command "admin license #{licenseId} #{licenseKey}")
+      if result =~ "License has expired" or result =~ "License is not valid" or result =~ "No command" do
+        function "error", [result]
+      else
+        command("admin save")
+        function "success", [result]
+      end
+    /api/set/log: |
+      logCount = $1["body"]["logCount"]
+      logSize = $1["body"]["logSize"]
+      command("admin log count #{logCount}")
+      command("admin log size #{logSize}")
+      command("admin save")
+      function "success", ["Log is set."]
+    /api/set/logStatus: |
+      solution = $1["body"]["solution"]
+      case $1["body"]["type"] do
+        "enable" ->
+          command "solution #{solution} enable log"
+          command "admin save"
+          function "success", ["Log is enabled"]
+        "disable" ->
+          command "solution #{solution} disable log"
+          command "admin save"
+          function "success", ["Log is disabled"]
+      end
+    /api/set/menu: |
+      with menu when menu != nil and menu != "" <- $1["body"]["menu"],
+           id   when id   != nil and id   != "" <- $1["body"]["id"] do
+        case $1["body"]["type"] do
+          "create" ->
+            command "#{menu} #{id}"
+            function "success", ["#{menu} #{id} was created"]
+          "delete" ->
+            command "no #{menu} #{id}"
+            function "success", ["#{menu} #{id} was deleted"]
+          _ ->
+            function "error", ["Invalid command"]
+        end
+      else
+        _error ->
+          log "set/solutions failure on: menu: #{$1["body"]["menu"]} id: #{$1["body"]["id"]}"
+          function "error", ["Invalid menu name or id"]
+      end
+    /api/set/noLicense: |
+      command "admin no license"
+      command "admin save"
+      function "success", ["License deactivated."]
+    /api/set/port: |
+      type = $1["body"]["type"]
+      port = $1["body"]["port"]
+      case type do
+        "add" ->
+          command "admin ssh #{port}"
+        "delete" ->
+          command "admin no ssh #{port}"
+      end
+      command "admin save"
+      function "success", ["#{type}: #{port} port."]
+    /api/set/processMonitorStatus: |
+      type = $1["body"]["type"]
+      case type do
+        "enable" ->
+          command "admin process monitor enabled"
+          command "admin save"
+          function "success", ["processMonitor is enabled"]
+        "disable" ->
+          command "admin process monitor disabled"
+          command "admin save"
+          function "success", ["processMonitor is disabled"]
+      end
+    /api/set/startOnBootStatus: |
+      type = $1["body"]["type"]
+      case type do
+        "enable" ->
+          command "admin start on boot enabled"
+          command "admin save"
+          function "success", ["startOnBoot is enabled"]
+        "disable" ->
+          command "admin start on boot disabled"
+          command "admin save"
+          function "success", ["startOnBoot is disabled"]
+      end
+
+    /api/system/log/enable: |
+      command "enable system log"
+      function "success", ["System log is enabled"]
+    /api/system/log/disable: |
+      command "disable system log"
+      function "success", ["System log is disabled"]
+    /api/user/add: |
+      add_user($1["body"]["username"], $1["body"]["password"])
+      command "admin save"
+      function "success", ["Added user."]
+    /api/user/delete: |
+      delete_user($1["body"]["username"])
+      command "admin save"
+      function "success", ["Deleted user."]
+    /api/test: function "success", [$2]
+
+    error: |
+      log "error", $1
+      %{"status" => "error", "result" => $1}
+    success: %{"status" => "success", "result" => $1}
