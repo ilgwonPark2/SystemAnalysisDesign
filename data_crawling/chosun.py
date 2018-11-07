@@ -10,22 +10,34 @@ def getText(link):
 	req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
 	webpage = urlopen(req).read()
 	soup = BeautifulSoup(webpage, 'html.parser')
-	header_tag = soup.find("h2", {"class": "title"})
-	date_tag = soup.find("span", {"class": "date01"})
-	content_tag =soup.find("div", {"class": "article_txt"})
 
+	header_tag = soup.find("h1", {"id": "news_title_text_id"})
+	date_tag = soup.find("div", {"class": "news_date"})
+	content_tag = soup.find("div", {"id": "news_body_id"})
+	header=soup.find("head")
+	category_tag=str(header).split('property=\"article:section\"')
+	
+	content_list = content_tag.findAll("div", {"class": "par"})
+	category=category_tag[0].split()[-1][9:-1]
 
-
-	header_tag = header_tag.findAll("h1")[0]
+	content = ""
+	if(category=="연예"):
+		for i in content_list[:-1]:
+			content += " " + i.text.strip()
+			content.strip()
+	else:
+		for i in content_list:
+			content += " " + i.text.strip()
+			content.strip()
 
 
 	header = header_tag.text.strip()
 	# 날짜 앞의 입력 스트링 제거
 	date = date_tag.text.strip()[3:19].replace(".","-")
-	# 컨텐트에 앞뒤 공백 제거
-	content = content_tag.text.strip()
 
-	return header, date, content
+	
+	
+	return [header, date, category, content]
 
 
 
@@ -33,7 +45,6 @@ if __name__ == '__main__':
 	d2 = date.today()
 	d1 = d2 - timedelta(days=1)
 	criteria = time.mktime(d1.timetuple())
-	f = open('sample_chosun.txt', mode='wt', encoding='utf-8')
 	page = 1
 	while True:
 		req = Request(
@@ -47,14 +58,16 @@ if __name__ == '__main__':
 
 		for i in second_crawl:
 			tag = i.findAll("a")[0]
-			print(tag)
-			header, date, content = getText(tag.get("href"))
-			f.write(header + '\t' + date + '\t' + content + '\n')
-			# # 데이트가 범위 밖에 벗어나면 아예 종료 되는 코드 여기에 작성
-			timestamp = time.mktime(datetime.strptime(date, '%Y-%m-%d %H:%M').timetuple())
+			print(tag.get("href"))
+			article_list = getText(tag.get("href"))
+			# 데이트가 범위 밖에 벗어나면 아예 종료 되는 코드
+			timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())
 			if (timestamp < criteria):
 				sys.exit()
+			for i in article_list:
+				print(i)
+				print("--------------------------------------------------")
+			print("\n\n\n")
 
 		page = page + 1
 		print('\n****** Next page *****\n')
-	f.close()

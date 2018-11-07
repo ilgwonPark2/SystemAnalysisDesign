@@ -14,8 +14,8 @@ def getText(link):
 	date_tag = soup.find("span", {"class": "date01"})
 	content_tag =soup.find("div", {"class": "article_txt"})
 	category_tag = soup.find("div", {"class": "location"})
-
-
+	another_content = content_tag.findAll("div")
+	
 
 
 	for tag in content_tag.findAll(True):
@@ -27,6 +27,10 @@ def getText(link):
 	date = date_tag.text[3:]
 	# 컨텐트에 앞뒤 공백 제거
 	content = content_tag.text.strip()
+
+	for i in another_content:
+		content += " " + i.text.strip()
+	content.strip()
 	category = category_tag.text.strip()
 
 	return [header, date, category, content]
@@ -48,6 +52,7 @@ if __name__ == '__main__':
 			tag = i.findAll("a")[0]
 			for a in tag.findAll(True):
 				a.extract()
+			print(tag.get("href"))
 			article_content = getText(tag.get("href"))
 			# 데이트가 범위 밖에 벗어나면 아예 종료 되는 부분
 			timestamp = time.mktime(datetime.strptime(article_content[1], '%Y-%m-%d %H:%M').timetuple())
@@ -57,6 +62,7 @@ if __name__ == '__main__':
 			for i in article_content:
 				print(i)
 				print("---------------------------------------")
+			print("\n\n\n")
 			
 
 

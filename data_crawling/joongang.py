@@ -16,7 +16,7 @@ def getText(link):
 	header=soup.find("head")
 	category_tag=str(header).split('property=\"article:section\"')
 	
-	category=category_tag[0].split()[-1][9:11]
+	category=category_tag[0].split()[-1][9:-1]
 
 	for tag in content_tag.findAll(True):
 		tag.extract()
@@ -46,6 +46,7 @@ if __name__ == '__main__':
 		second_crawl=soup.find("ul",{"class":"list_default"}).findAll("li")
 		for i in second_crawl:
 			tag = i.findAll("a")[0]
+			print(tag.get("href"))
 			article_list = getText(tag.get("href"))
 			# 데이트 벗어나면 종료 부분
 			timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())

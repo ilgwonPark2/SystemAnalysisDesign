@@ -15,8 +15,8 @@ def getText(link):
 	date_tag = soup.find("span", {"class": "date01"})
 	content_tag =soup.find("div", {"class": "article_txt"})
 	category_tag = soup.find("div", {"class": "location"})
-
-
+	another_content = content_tag.findAll("div")
+	
 
 
 	for tag in content_tag.findAll(True):
@@ -28,6 +28,10 @@ def getText(link):
 	date = date_tag.text[3:]
 	# 컨텐트에 앞뒤 공백 제거
 	content = content_tag.text.strip()
+
+	for i in another_content:
+		content += " " + i.text.strip()
+	content.strip()
 	category = category_tag.text.strip()
 
 	return [header, date, category, content]
@@ -62,8 +66,9 @@ if __name__ == '__main__':
 				sys.exit()
 			for i in article_list:
 				print(i)
-				print("-----------------------)
+				print("-----------------------")
 			wr.writerow(article_list)
+			print("\n\n\n")
 
 
 		page=page+15
