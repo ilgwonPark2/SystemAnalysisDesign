@@ -4,6 +4,7 @@ from datetime import date, timedelta, datetime
 import time
 import urllib
 import sys
+import csv
 
 
 def getText(link):
@@ -36,6 +37,11 @@ if __name__ == '__main__':
 	d1 = d2 - timedelta(days=1)
 	criteria = time.mktime(d1.timetuple())
 	page = 1
+	# csv 파일로 저장, filenmae 변수에 파일명 입력
+	filename = 'joongang_1day.csv'
+	f = open("sample_data/"+filename, 'w', encoding='utf-8', newline='')
+	wr = csv.writer(f)
+	wr.writerow(["제목","날짜","분류","본문"])
 	while True:
 		req = Request('https://search.joins.com/JoongangNews?page={}'
                       '&Keyword=%EB%82%A8%EB%B6%81&SortType=New&SearchCategoryType=JoongangNews'.format(page))
@@ -50,13 +56,15 @@ if __name__ == '__main__':
 			# 데이트 벗어나면 종료 부분
 			timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())
 			if (timestamp < criteria):
+				f.close()
 				sys.exit()
 
+			wr.writerow(article_list)
 			# 데이터베이스 연결하는 코드 여기에 작성해야함
 			for i in article_list:
 				print(i)
 				print("-----------------------")
 			print("\n\n\n")
-
+			
 		page = page + 1
 		print('\n****** Next page *****\n')
