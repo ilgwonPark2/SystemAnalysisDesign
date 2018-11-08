@@ -10,14 +10,21 @@ def getText(link):
 	req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
 	webpage = urlopen(req).read()
 	soup = BeautifulSoup(webpage, 'html.parser')
+	header=soup.find("head")
 	header_tag = soup.find("h2", {"class": "title"})
 	date_tag = soup.find("span", {"class": "date01"})
 	content_tag =soup.find("div", {"class": "article_txt"})
 	category_tag = soup.find("div", {"class": "location"})
 	another_content = content_tag.findAll("div")
-	
-
-
+	author_tag = str(header).split('property=\"dable:author\"')
+	author_list = author_tag[0].split()[-6:-1]
+	author=""
+	for i in range(len(author_list)):
+		if 'content="' in author_list[i]:
+			author = author_list[i][9:]
+			break
+		else:
+			author = ""
 	for tag in content_tag.findAll(True):
 		tag.extract()
 
@@ -33,7 +40,7 @@ def getText(link):
 	content.strip()
 	category = category_tag.text.strip()
 
-	return [header, date, category, content]
+	return [header, date, category, author, content]
 
 if __name__ == '__main__':
 	d2 = date.today()

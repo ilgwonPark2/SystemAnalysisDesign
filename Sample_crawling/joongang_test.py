@@ -16,9 +16,16 @@ def getText(link):
 	content_tag = soup.find("div", {"id": "article_body"})
 	header=soup.find("head")
 	category_tag=str(header).split('property=\"article:section\"')
-	
+	author_tag = str(header).split('property=\"dable:author\"')
+	author = author_tag[0].split()[-1][9:-1]
+	if "," in author:
+		author = author.split(",")[0]
+	if len(author)==0:
+		author=""
+	if(author=='"'):
+		author = ""
 	category=category_tag[0].split()[-1][9:-1]
-
+	
 	for tag in content_tag.findAll(True):
 		tag.extract()
 
@@ -29,7 +36,7 @@ def getText(link):
 	# 컨텐트에 앞뒤 공백 제거
 	content = content_tag.text.strip()
 	
-	return [header, date, category, content]
+	return [header, date, category, author, content]
 
 
 if __name__ == '__main__':
@@ -41,7 +48,7 @@ if __name__ == '__main__':
 	filename = 'joongang_1day.csv'
 	f = open("sample_data/"+filename, 'w', encoding='utf-8', newline='')
 	wr = csv.writer(f)
-	wr.writerow(["제목","날짜","분류","본문"])
+	wr.writerow(["제목","날짜","분류","기자","본문"])
 	while True:
 		req = Request('https://search.joins.com/JoongangNews?page={}'
                       '&Keyword=%EB%82%A8%EB%B6%81&SortType=New&SearchCategoryType=JoongangNews'.format(page))
