@@ -10,39 +10,31 @@ def getText(link):
 	webpage = urlopen(req).read()
 	soup = BeautifulSoup(webpage, 'html.parser')
 	header=soup.find("head")
-	header_tag = soup.find("h2", {"class": "title"})
-	date_tag = soup.find("span", {"class": "date01"})
-	content_tag =soup.find("div", {"class": "article_txt"})
-	category_tag = soup.find("div", {"class": "location"})
-	another_content = content_tag.findAll("div")
+	header_tag = soup.find("header", {"class": "article-header"}).find("h3")
+	date_tag = soup.find("div", {"class": "info"})
+	content_tag =soup.find("div", {"id": "article_story"})
+	category_tag = str(header).split('property=\"article:section\"')
 	author_tag = str(header).split('property=\"dable:author\"')
-	author_list = author_tag[0].split()[-6:-1]
-	author=""
-	for i in range(len(author_list)):
-		if 'content="' in author_list[i]:
-			author = author_list[i][9:]
-			break
-		else:
-			author = ""
-	for tag in content_tag.findAll(True):
-		tag.extract()
-
-
+	
 	header = header_tag.text.strip()
 	# 날짜 앞의 입력 스트링 제거
-	date = date_tag.text[3:]
-	# 컨텐트에 앞뒤 공백 제거
-	content = content_tag.text.strip()
+	date = date_tag.findAll("p")[0].text[3:].strip().replace(".","-")
 
-	for i in another_content:
-		content += " " + i.text.strip()
+	category = category_tag[0].split()[-1][9:-1]
+
+	author = author_tag[0].split()[-1][9:-1]
+
+	# 컨텐트에 앞뒤 공백 제거
+	content_list = content_tag.findAll("p")
+	content=""
+	for i in content_list:
+		content += i.text + " "
 	content.strip()
-	category = category_tag.text.strip()
 
 	return [header, date, category, author, content]
 
 	
-abc = getText("http://news.donga.com/3/all/20181107/92760724/1")
+abc = getText("http://www.hankookilbo.com/News/Read/201811081659791046")
 for i in abc:
 	print(i)
 	print("------------------------------------------------------------")

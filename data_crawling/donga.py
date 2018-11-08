@@ -60,13 +60,13 @@ if __name__ == '__main__':
 			for a in tag.findAll(True):
 				a.extract()
 			print(tag.get("href"))
-			article_content = getText(tag.get("href"))
+			article_list = getText(tag.get("href"))
 			# 데이트가 범위 밖에 벗어나면 아예 종료 되는 부분
-			timestamp = time.mktime(datetime.strptime(article_content[1], '%Y-%m-%d %H:%M').timetuple())
+			timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())
 			if(timestamp < criteria):
 				sys.exit()
 			# 요기에다가 mysql로 보내는 코드 작성해야합니다
-			for i in article_content:
+			for i in article_list:
 				print(i)
 				print("---------------------------------------")
 			print("\n\n\n")

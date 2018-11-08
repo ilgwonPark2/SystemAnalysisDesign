@@ -4,7 +4,7 @@ from datetime import date, timedelta, datetime
 import time
 import urllib
 import sys
-
+import csv
 
 def getText(link):
 	req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
@@ -43,6 +43,11 @@ if __name__ == '__main__':
     d1 = d2 - timedelta(days=7)
     criteria = time.mktime(d1.timetuple())
     page = 1
+	# csv 파일로 저장, filenmae 변수에 파일명 입력
+    filename = 'hkilbo_1week.csv'
+    f = open("sample_data/"+filename, 'w', encoding='utf-8', newline='')
+    wr = csv.writer(f)
+    wr.writerow(["제목","날짜","분류","기자","본문"])
     while True:
         req = Request('http://search.hankookilbo.com/v2/?stype=&ssort=1&page={}&'
                       'cddtc=&cate_str=&sword=%EB%82%A8%EB%B6%81&sfield=&sdate=&edate='.format(page))
@@ -54,13 +59,15 @@ if __name__ == '__main__':
         for i in second_crawl:
             tag = i.findAll("a")[0]
             print(tag.get("href"))
-            article_content = getText(tag.get("href"))
+            article_list = getText(tag.get("href"))
 			# 데이트가 범위 밖에 벗어나면 아예 종료 되는 부분
-            timestamp = time.mktime(datetime.strptime(article_content[1], '%Y-%m-%d %H:%M').timetuple())
+            timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())
             if(timestamp < criteria):
+                f.close()
                 sys.exit()
+            wr.writerow(article_list)
 			# 요기에다가 mysql로 보내는 코드 작성해야합니다
-            for i in article_content:
+            for i in article_list:
                 print(i)
                 print("---------------------------------------")
             print("\n\n\n")
