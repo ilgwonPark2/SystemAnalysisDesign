@@ -16,15 +16,13 @@ def getText(link):
 	content_tag =soup.find("div", {"id": "article_story"})
 	category_code = soup.find("div", {"class": "sub-header-container"}).find("script").text.strip()[-6:-4]
 	category = soup.find("div",{"id":category_code}).find('h2').text.strip()
-	#category_tag = str(header).split('property=\"article:section\"')
 	author_tag = str(header).split('property=\"dable:author\"')
 	
 	header = header_tag.text.strip()
 	# 날짜 앞의 입력 스트링 제거
 	date = date_tag.findAll("p")[0].text[3:].strip().replace(".","-")
 
-	#category = category_tag.text.strip()
-	#category = category_tag[0].split()[-1][9:-1]
+
 
 	author = author_tag[0].split()[-1][9:-1]
 
