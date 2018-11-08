@@ -16,10 +16,25 @@ def getText(link):
 	date_tag = soup.find("div", {"class": "news_date"})
 	content_tag = soup.find("div", {"id": "news_body_id"})
 	header=soup.find("head")
-	category_tag=str(header).split('property=\"article:section\"')
+	category_tag= str(header).split('property=\"article:section\"')
+	author_tag = str(header).split('property=\"dable:author\"')
 	
 	content_list = content_tag.findAll("div", {"class": "par"})
 	category=category_tag[0].split()[-1][9:-1]
+	author_list = author_tag[0].split()[-5:]
+	author=""
+	for i in range(len(author_list)):
+		if "기자" in author_list[i]:
+			if len(author_list[i-1])>6:
+				author = author_list[i-1][9:]
+				break
+			else:
+				author = author_list[i-2][9:]
+				break
+		else:
+			author = ""
+	if "=" in author:
+		author=author.split("=")[-1]
 
 	content = ""
 	if(category=="연예"):
@@ -38,7 +53,8 @@ def getText(link):
 
 	
 	
-	return [header, date, category, content]
+	return [header, date, category, author, content]
+
 
 
 
@@ -51,7 +67,7 @@ if __name__ == '__main__':
 	filename = 'chosun_1day.csv'
 	f = open("sample_data/"+filename, 'w', encoding='utf-8', newline='')
 	wr = csv.writer(f)
-	wr.writerow(["제목","날짜","분류","본문"])
+	wr.writerow(["제목","날짜","분류", "기자" ,"본문"])
 	while True:
 		req = Request(
 			"http://search.chosun.com/search/news.search?query=%EB%82%A8%EB%B6%81&pageno={}&orderby=news&naviarraystr=&kind"
