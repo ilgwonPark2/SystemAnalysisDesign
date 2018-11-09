@@ -6,73 +6,35 @@ import time
 import urllib
 import sys
 
-def getText(link):
-	req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
-	webpage = urlopen(req).read()
-	soup = BeautifulSoup(webpage, 'html.parser')
-
-
-	category_tag = soup.find("div", {"class": "sec_title"})
-	category = category_tag.text.strip()
-	if category == "마켓·비즈" or category == "라이프":
-		header_tag = soup.find("h1", {"id": "articleTtitle"})
-	else:
-		header_tag = soup.find("h1", {"id": "article_title"})
-	date_tag = soup.find("div", {"class": "byline"})
-
-
-	author_tag = soup.find("span", {"class":"name"})
-	content_tag =soup.findAll("p", {"class": "content_text"})
-
-	header = header_tag.text.strip()
-	# 날짜 앞의 입력 스트링 제거
-	date = date_tag.find("em").text[5:-3].strip().replace(".","-")
-
-	if author_tag.text=="":
-		author = ""
-	else:
-		author = author_tag.text.split()[0]
-	if "·" in author:
-		author = author.split("·")[0]
-	author.strip()
-
-	content=""
-	for i in content_tag:
-		content += i.text + " "
-	content.strip()
-
-	return [header, date, category, author, content]
-
 
 
 
 
 if __name__ == '__main__':
     d2 = date.today()
-    d1 = d2 - timedelta(days=3)
+    d1 = d2 - timedelta(days=1)
     criteria = time.mktime(d1.timetuple())
-    page = 0
+    f = open('sample_khan.txt', mode='wt', encoding='utf-8')
+    page = 1
     while True:
-        req = Request('http://search.khan.co.kr/search.html?stb=khan&q=%EB%82%A8%EB%B6%81&pg={}&sort=1'.format(page))
+        req = Request('http://search.hani.co.kr/Search?command=query&keyword=%EB%82%A8%EB%B6%81&media=news&sort=d&period=all&'
+                      'datefrom=2000.01.01&dateto=2018.11.05&pageseq={}'.format(page))
         webpage = urlopen(req).read()
         soup = BeautifulSoup(webpage, 'html.parser')
         url_collect = []
 		###Url Crawling
-        second_crawl=soup.find("div",{"class":"news section"}).findAll("dl",{"class":"phArtc"})
+        second_crawl=soup.find("ul",{"class":"search-result-list"}).findAll("li")
 
         for i in second_crawl:
             tag = i.findAll("a")[0]
             print(tag.get("href"))
-            article_list = getText(tag.get("href"))
-			# 데이트가 범위 밖에 벗어나면 아예 종료 되는 부분
-            timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())
-            if(timestamp < criteria):
-                sys.exit()
-			# 요기에다가 mysql로 보내는 코드 작성해야합니다
-            for i in article_list:
-                print(i)
-                print("---------------------------------------")
-            print("\n\n\n")
+			# header, date, content = getText(tag.get("href"))
+			# f.write(header + '\t' + date + '\t' + content + '\n')
+			# # # 데이트가 범위 밖에 벗어나면 아예 종료 되는 코드 여기에 작성
+			# timestamp = time.mktime(datetime.strptime(date, '%Y-%m-%d %H:%M').timetuple())
+			# if (timestamp < criteria):
+			# 	sys.exit()
 
         page = page + 1
         print('\n****** Next page *****\n')
+	# f.close()
