@@ -24,7 +24,6 @@ def getText(link):
 	else:
 		author_tag = str(header).split('property=\"dable:author\"')
 		author_list = author_tag[0].split()[-6:]
-	
 		
 		for i in reversed(author_list):
 			if "content=" in i:
@@ -32,18 +31,14 @@ def getText(link):
 				if '"' in author:
 					author = author.replace('"',"")
 				if ',' in author:
-					author = author.split(',')
+					author = author.split(',')[0]
 				break
 	
 	author.strip()
 	
-	
-
 	header = header_tag.text.strip()
 	# 날짜 앞의 입력 스트링 제거
 	date = date_tag.findAll(True)[0].text.strip()[4:].strip()
-
-	
 
 	for i in content_tag.findAll(True):
 		i.extract()
@@ -51,16 +46,13 @@ def getText(link):
 
 	return [header, date, category, author, content]
 
-
-
-
 if __name__ == '__main__':
     d2 = date.today()
-    d1 = d2 - timedelta(days=1)
+    d1 = d2 - timedelta(days=2)
     criteria = time.mktime(d1.timetuple())
     page = 1
     while True:
-        req = Request('http://search.hani.co.kr/Search?command=query&keyword=%EB%82%A8%EB%B6%81&media=news&sort=d&period=all&datefrom=2000.01.01&dateto=2018.11.05&pageseq={}'.format(page))
+        req = Request('http://search.hani.co.kr/Search?command=query&keyword=%EB%82%A8%EB%B6%81&media=news&sort=d&period=all&datefrom=2000.01.01&dateto=2018.11.09&pageseq={}'.format(page))
         webpage = urlopen(req).read()
         soup = BeautifulSoup(webpage, 'html.parser')
         url_collect = []

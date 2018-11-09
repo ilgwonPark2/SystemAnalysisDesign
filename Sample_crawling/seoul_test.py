@@ -5,6 +5,7 @@ from datetime import datetime
 import time
 import urllib
 import sys
+import csv
 
 def getText(link):
 	req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
@@ -57,10 +58,14 @@ def getText(link):
 
 if __name__ == '__main__':
     d2 = date.today()
-    d1 = d2 - timedelta(days=3)
+    d1 = d2 - timedelta(days=1)
     criteria = time.mktime(d1.timetuple())
-    
     page = 1
+    # csv 파일로 저장, filenmae 변수에 파일명 입력
+    filename = 'seoul_1day.csv'
+    f = open("sample_data/"+filename, 'w', encoding='utf-8', newline='')
+    wr = csv.writer(f)
+    wr.writerow(["제목","날짜","분류", "기자", "본문"])
     while True:
         req = Request('http://search.seoul.co.kr/index.php?keyword=%EB%82%A8%EB%B6%81&pageNum={}'.format(page))
         webpage = urlopen(req).read()
@@ -76,11 +81,13 @@ if __name__ == '__main__':
                 # 데이트가 범위 밖에 벗어나면 아예 종료 되는 부분
                 timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())
                 if(timestamp < criteria):
+                    f.close()
                     sys.exit()
                 # 요기에다가 mysql로 보내는 코드 작성해야합니다
                 for i in article_list:
                     print(i)
                     print("---------------------------------------")
+                wr.writerow(article_list)
                 print("\n\n\n")
 
         page = page + 1
