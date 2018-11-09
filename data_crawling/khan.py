@@ -51,7 +51,7 @@ if __name__ == '__main__':
     d2 = date.today()
     d1 = d2 - timedelta(days=3)
     criteria = time.mktime(d1.timetuple())
-    page = 0
+    page = 1
     while True:
         req = Request('http://search.khan.co.kr/search.html?stb=khan&q=%EB%82%A8%EB%B6%81&pg={}&sort=1'.format(page))
         webpage = urlopen(req).read()

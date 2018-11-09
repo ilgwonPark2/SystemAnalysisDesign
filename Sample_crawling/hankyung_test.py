@@ -25,17 +25,6 @@ def getText(link):
 	# 날짜 앞의 입력 스트링 제거
 	date = date_tag.text.strip().replace(".","-")
 
-	"""
-	category_list = category_tag[0].split()[-6:]
-	category = ""
-	for i in reversed(category_list):
-		if "content=" in i:
-			category = i[9:]
-			if '"' in category:
-				category = category.replace('"',"")
-			break
-	category.strip()
-	"""
 	category = category_tag.text.strip()
 
 	author_list = author_tag[0].split()[-6:]
