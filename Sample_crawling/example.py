@@ -9,53 +9,53 @@ def getText(link):
 	req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
 	webpage = urlopen(req).read()
 	soup = BeautifulSoup(webpage, 'html.parser')
-
-
-	category_tag = soup.find("div", {"class": "sec_title"})
-	category = category_tag.text.strip()
-	if category == "마켓·비즈" or category == "라이프":
-		header_tag = soup.find("h1", {"id": "articleTtitle"})
-	else:
-		header_tag = soup.find("h1", {"id": "article_title"})
-	date_tag = soup.find("div", {"class": "byline"})
-
-
-	author_tag = soup.find("span", {"class":"name"})
-	content_tag =soup.findAll("p", {"class": "content_text"})
+	header=soup.find("head")
+	header_tag = soup.find("h1", {"class": "title"})
+	date_tag = soup.find("span", {"class": "time"})
+	category_tag = soup.find("a", {"class": "sub_tag"})
+	#category_tag= str(header).split('property=\"article:section\"')
+	author_tag = str(header).split('property=\"dable:author\"')
+	content_tag = soup.find("div", {"id": "newsView"})
+	
 
 	header = header_tag.text.strip()
 	# 날짜 앞의 입력 스트링 제거
-	date = date_tag.find("em").text[5:-3].strip().replace(".","-")
+	date = date_tag.text.strip().replace(".","-")
 
-	#category = category_tag.text.strip()
-	if author_tag.text=="":
-		author = ""
-	else:
-		author = author_tag.text.split()[0]
-	if "·" in author:
-		author = author.split("·")[0]
+	"""
+	category_list = category_tag[0].split()[-6:]
+	category = ""
+	for i in reversed(category_list):
+		if "content=" in i:
+			category = i[9:]
+			if '"' in category:
+				category = category.replace('"',"")
+			break
+	category.strip()
+	"""
+	category = category_tag.text.strip()
+
+	author_list = author_tag[0].split()[-6:]
+	author = ""
+	for i in reversed(author_list):
+		if "content=" in i:
+			author = i[9:]
+			if '"' in author:
+				author = author.replace('"',"")
+			if '/' in author:
+				author = author.split('/')[0]
+			break
 	author.strip()
-
-	#author_list = author_tag[0].split()[-6:]
-	#author=""
-	#for i in range(len(author_list)):
-	#	if 'content="' in author_list[i]:
-	#		author = author_list[i][9:-1]
-	#		break
-	#	else:
-	#		author = ""
-
-	# 컨텐트에 앞뒤 공백 제거
-	content=""
-	for i in content_tag:
-		content += i.text + " "
-	content.strip()
+	
+	for i in content_tag.findAll(True):
+		i.extract()
+	content = content_tag.text.strip()
 
 	return [header, date, category, author, content]
 
 
 	
-abc = getText("http://biz.khan.co.kr/khan_art_view.html?artid=201811062129005&code=920101")
+abc = getText("http://plus.hankyung.com/apps/newsinside.view?aid=201811050745A")
 for i in abc:
 	print(i)
 	print("------------------------------------------------------------")
