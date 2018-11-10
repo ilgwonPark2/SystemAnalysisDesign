@@ -3,10 +3,10 @@ from watson_developer_cloud import NaturalLanguageUnderstandingV1
 from watson_developer_cloud.natural_language_understanding_v1 import Features, SentimentOptions, EmotionOptions, KeywordsOptions
 
 
-
+_token=['6LtKXgn8XiDZCjAOgr6ibyiyO8yYOXXdwcu4cwKxVUHc','RAXTXY4DOozh-zWFV71yhhJxEP3QIDRNUClfIupJdslC']
 natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2018-03-16',
-    iam_apikey='6LtKXgn8XiDZCjAOgr6ibyiyO8yYOXXdwcu4cwKxVUHc',
+    iam_apikey=_token[0],
     url='https://gateway.watsonplatform.net/natural-language-understanding/api'
 )
 
