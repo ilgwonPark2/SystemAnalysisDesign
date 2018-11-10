@@ -1,6 +1,6 @@
 import json
 from watson_developer_cloud import NaturalLanguageUnderstandingV1
-from watson_developer_cloud.natural_language_understanding_v1 import Features, SentimentOptions, EmotionOptions
+from watson_developer_cloud.natural_language_understanding_v1 import Features, SentimentOptions, EmotionOptions, KeywordsOptions
 
 
 
@@ -19,6 +19,10 @@ In viewing the MSDF’s stubborn insistence on flying the Rising Sun Flag along 
 
 response = natural_language_understanding.analyze(
     text=_text,
-    features=Features(sentiment=SentimentOptions(),emotion=EmotionOptions())).get_result()
+    features=Features(sentiment=SentimentOptions(),emotion=EmotionOptions(),keywords=KeywordsOptions(sentiment=True,emotion=True,limit=2))).get_result()
 
 print(json.dumps(response, indent=2))
+
+
+# document reference
+# https://console.bluemix.net/apidocs/natural-language-understanding?language=python#emotion
