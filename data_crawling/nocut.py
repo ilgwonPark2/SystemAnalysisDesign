@@ -70,7 +70,7 @@ if __name__ == '__main__':
 	db = MySQLdb.connect(host="localhost", user="root", passwd="cloudera", db="mysql")
 	db.set_character_set('uft8')
 	cursor = db.cursor()
-    #f = open('sample_nocut.txt', mode='wt', encoding='utf-8')
+	#f = open('sample_nocut.txt', mode='wt', encoding='utf-8')
     # 크롬 드라이버 실행
 	base_dir = os.getcwd()
 	driver = webdriver.Chrome(base_dir + '/chromedriver')
@@ -84,32 +84,27 @@ if __name__ == '__main__':
         # headers=session.get('http://www.nocutnews.co.kr/headers')
         # print(headers)
 
-        driver.get('http://search.nocutnews.co.kr/list?sk=2&sv=%EB%82%A8%EB%B6%81&sp=0&ot=2&sc=0&pageIndex={}&a=Center'.format(page))
-        result = driver.page_source
-        soup = BeautifulSoup(result, 'html.parser')
-
-        second_crawl = soup.find("ul", {"class": "newslist"}).findAll("li")
+		driver.get('http://search.nocutnews.co.kr/list?sk=2&sv=%EB%82%A8%EB%B6%81&sp=0&ot=2&sc=0&pageIndex={}&a=Center'.format(page))
+		result = driver.page_source
+		soup = BeautifulSoup(result, 'html.parser')
+		second_crawl = soup.find("ul", {"class": "newslist"}).findAll("li")
         
-
-        for i in second_crawl:
+		for i in second_crawl:
 			tag = i.findAll("a")[0]
 			print(tag.get("href"))
 			article_list = getText(tag.get("href"))
 			# 데이트가 범위 밖에 벗어나면 아예 종료 되는 부분
 			timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())
-			sql = "INSERT INTO News Values(%s,%s,%s,%s,%s)" % (
-				"'" + article_list[0] + "'", "'" + article_list[1] + "'", "'" + article_list[2] + "'", "'" +
-				article_list[3] + "'", "'" + article_list[4] + "'", "'" + "노컷" + "'")
-            if(timestamp < criteria):
-                sys.exit()
+			sql = "INSERT INTO News Values(%s,%s,%s,%s,%s)" % ("'" + article_list[0] + "'", "'" + article_list[1] + "'", "'" + article_list[2] + "'", "'" +article_list[3] + "'", "'" + article_list[4] + "'", "'" + "노컷" + "'")
+			if(timestamp < criteria):
+				sys.exit()
 			# 요기에다가 mysql로 보내는 코드 작성해야합니다
-            for i in article_list:
-                print(i)
-                print("---------------------------------------")
-            print("\n\n\n")
-
-        page = page + 1
-        print('\n****** Next page *****\n')
+		for i in article_list:
+			print(i)
+			print("---------------------------------------")
+			print("\n\n\n")
+		page = page + 1
+		print('\n****** Next page *****\n')
 
 
 
