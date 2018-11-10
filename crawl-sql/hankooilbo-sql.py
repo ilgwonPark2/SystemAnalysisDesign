@@ -45,6 +45,9 @@ if __name__ == '__main__':
     d1 = d2 - timedelta(days=7)
     criteria = time.mktime(d1.timetuple())
     page = 1
+    db = MySQLdb.connect(host="localhost", user="root", passwd="cloudera", db="mysql")
+    db.set_character_set('uft8')
+    cursor = db.cursor()
     while True:
         req = Request('http://search.hankookilbo.com/v2/?stype=&ssort=1&page={}&'
                       'cddtc=&cate_str=&sword=%EB%82%A8%EB%B6%81&sfield=&sdate=&edate='.format(page))
@@ -59,9 +62,23 @@ if __name__ == '__main__':
             article_content = getText(tag.get("href"))
 			# 데이트가 범위 밖에 벗어나면 아예 종료 되는 부분
             timestamp = time.mktime(datetime.strptime(article_content[1], '%Y-%m-%d %H:%M').timetuple())
+            sql = "INSERT INTO News Values(%s,%s,%s,%s,%s)" % (
+                "'" + article_content[0] + "'", "'" + article_content[1] + "'", "'" + article_content[2] + "'", "'" +
+                article_content[3] + "'", "'" + article_content[4] + "'", "'" + "한국일보" + "'")
+
+            try:
+                cursor.execute(sql)
+                db.commit()
+            except Exception as e:
+                print(str(e))
+                db.rollback()
+                db.close()
+
             if(timestamp < criteria):
                 sys.exit()
-			# 요기에다가 mysql로 보내는 코드 작성해야합니다
+
+
+
             for i in article_content:
                 print(i)
                 print("---------------------------------------")
@@ -70,17 +87,5 @@ if __name__ == '__main__':
         print('\n****** Next page *****\n')
         
         
-        def save_record(header, date, category, author, content):
-            db=MySQLdb.connect(host="localhst", user="root", passwd="cloudera",db="MySQL")
-            db.set_character_set('uft8')
-            cursor =db.cursor()
-            sql ="INSERT INTO document(header, date, category, author, content) value(%s,%s,%s,%s,%s)"%("'"+header+"'","'"+date+"'","'"+category+"'","'"+author+"'","'"+content+"'")
-            
-            try:
-                cursor.execute(sql)
-                db.commit()
-            except Exception as e:
-                print(str(e))
-                db.rollback()
-                db.close()
+
             

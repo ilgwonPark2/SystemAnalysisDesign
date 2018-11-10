@@ -4,6 +4,7 @@ from datetime import date, timedelta, datetime
 import time
 import urllib
 import sys
+import MySQLdb
 
 
 def getText(link):
@@ -43,6 +44,12 @@ def getText(link):
 	return [header, date, category, author, content]
 
 if __name__ == '__main__':
+	# db=MySQLdb.connect(host="localhost", user="root",passwd="cloudera",db="mysql")
+	# db.set_character_set('utf8')
+
+	# cursor=db.cursor()
+    #
+	# sql="INSERT "
 	d2 = date.today()
 	d1 = d2 - timedelta(days=1)
 	criteria = time.mktime(d1.timetuple())

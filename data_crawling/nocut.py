@@ -6,6 +6,7 @@ from datetime import datetime
 import time
 import urllib
 import sys
+import MySQLdb
 import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -63,17 +64,20 @@ def getText(link):
 
 
 if __name__ == '__main__':
-    d2 = date.today()
-    d1 = d2 - timedelta(days=2)
-    criteria = time.mktime(d1.timetuple())
+	d2 = date.today()
+	d1 = d2 - timedelta(days=30)
+	criteria = time.mktime(d1.timetuple())
+	db = MySQLdb.connect(host="localhost", user="root", passwd="cloudera", db="mysql")
+	db.set_character_set('uft8')
+	cursor = db.cursor()
     #f = open('sample_nocut.txt', mode='wt', encoding='utf-8')
     # 크롬 드라이버 실행
-    base_dir = os.getcwd()
-    driver = webdriver.Chrome(base_dir + '/chromeforwindow.exe')
-    driver.implicitly_wait(10)
-    page = 0
-    while True:
-        # session = requests.Session()
+	base_dir = os.getcwd()
+	driver = webdriver.Chrome(base_dir + '/chromedriver')
+	driver.implicitly_wait(10)
+	page = 0
+	while True:
+		# session = requests.Session()
         # session.headers.update({'User-Agent': 'Custom user agent'})
         #
         #
@@ -88,11 +92,14 @@ if __name__ == '__main__':
         
 
         for i in second_crawl:
-            tag = i.findAll("a")[0]
-            print(tag.get("href"))
-            article_list = getText(tag.get("href"))
+			tag = i.findAll("a")[0]
+			print(tag.get("href"))
+			article_list = getText(tag.get("href"))
 			# 데이트가 범위 밖에 벗어나면 아예 종료 되는 부분
-            timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())
+			timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())
+			sql = "INSERT INTO News Values(%s,%s,%s,%s,%s)" % (
+				"'" + article_list[0] + "'", "'" + article_list[1] + "'", "'" + article_list[2] + "'", "'" +
+				article_list[3] + "'", "'" + article_list[4] + "'", "'" + "노컷" + "'")
             if(timestamp < criteria):
                 sys.exit()
 			# 요기에다가 mysql로 보내는 코드 작성해야합니다
