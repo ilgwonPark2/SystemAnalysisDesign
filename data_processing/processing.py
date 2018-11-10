@@ -1,6 +1,8 @@
 import json
 from watson_developer_cloud import NaturalLanguageUnderstandingV1
-from watson_developer_cloud.natural_language_understanding_v1 import Features, SentimentOptions
+from watson_developer_cloud.natural_language_understanding_v1 import Features, SentimentOptions, EmotionOptions
+
+
 
 natural_language_understanding = NaturalLanguageUnderstandingV1(
     version='2018-03-16',
@@ -17,6 +19,6 @@ In viewing the MSDF’s stubborn insistence on flying the Rising Sun Flag along 
 
 response = natural_language_understanding.analyze(
     text=_text,
-    features=Features(sentiment=SentimentOptions(targets=['japan']))).get_result()
+    features=Features(sentiment=SentimentOptions(),emotion=EmotionOptions())).get_result()
 
 print(json.dumps(response, indent=2))
