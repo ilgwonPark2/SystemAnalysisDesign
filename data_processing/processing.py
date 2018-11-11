@@ -41,7 +41,7 @@ def doNLP(_content):
     response = natural_language_understanding.analyze(
         text=_content,
         features=Features(sentiment=SentimentOptions(),emotion=EmotionOptions(),keywords=KeywordsOptions(sentiment=True,emotion=True,limit=2))).get_result()
-    print(json.dumps(response, indent=2))
+    # print(json.dumps(response, indent=2))
     return json.dumps(response, indent=2)
 
 
@@ -57,16 +57,19 @@ if __name__ == '__main__':
             time.sleep(0.1)
         # have to handle false case.
             updateDB(conn, json_data, row[0])
-
+    print('Finished')
 
 
 
 # test
-# for row in sql_return:
-#     json_data = doNLP(row[1])
-#     print(row[0],json_data)
-#     time.sleep(1)
-#     updateDB(conn, json_data, row[0])
+for row in sql_return:
+    if row[0]>579:
+        if row[1].strip() != '':
+            json_data = doNLP(row[1])
+            time.sleep(0.1)
+            print(row[0],json_data)
+            # have to handle false case.
+            updateDB(conn, json_data, row[0])
 
 
 # document reference
