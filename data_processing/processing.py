@@ -1,6 +1,18 @@
 import json
 from watson_developer_cloud import NaturalLanguageUnderstandingV1
 from watson_developer_cloud.natural_language_understanding_v1 import Features, SentimentOptions, EmotionOptions, KeywordsOptions
+import pymysql
+
+def SQL_text():
+    conn = pymysql.connect(host='localhost', user='root', password='Cloudera301!',
+                           db='mysql', charset='utf8')
+    curs = conn.cursor()
+    sql="Select article_content From News"
+    curs.execute(sql)
+    conn.commit()
+    row = curs.fetchall() #row는 튜플형태로 나열되어있음.
+    return row
+
 
 
 _token=['6LtKXgn8XiDZCjAOgr6ibyiyO8yYOXXdwcu4cwKxVUHc','RAXTXY4DOozh-zWFV71yhhJxEP3QIDRNUClfIupJdslC']

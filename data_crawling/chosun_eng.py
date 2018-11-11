@@ -4,8 +4,8 @@ from datetime import date, timedelta, datetime
 import time
 import urllib
 import sys
-#import MySQLdb
-
+import MySQLdb
+import pymysql
 
 def getText(link):
 	req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     #
     # sql="INSERT "
     d2 = date.today()
-    d1 = d2 - timedelta(days=
+    d1 = d2 - timedelta(days=30)
     criteria = time.mktime(d1.timetuple())
     page = 1
     while True:
@@ -91,7 +91,12 @@ if __name__ == '__main__':
             if (timestamp < criteria):
                 print("시간 범위에 벗어났다")
                 sys.exit()
-            #요기에다가 mysql로 보내는 코드 작성해야합니다
+            db=pymysql.connect(host='117.17.187.180',port=4100, user='root',password='Cloudera301!',db='mysql')
+            db.set_character_set('utf8')
+            cursor=db.cursor()
+            sql = "INSERT INTO News Values(%s,%s,%s,%s,%s)" % (
+            "'" + article_list[0] + "'", "'" + article_list[1] + "'", "'" + article_list[2] + "'",
+            "'" + article_list[3] + "'", "'" + article_list[4] + "'", "'" + "chosun" + "'")
             for i in article_list:
                 print(i)
                 print("---------------------------------------")
