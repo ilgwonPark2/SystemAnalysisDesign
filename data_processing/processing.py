@@ -4,20 +4,7 @@ from watson_developer_cloud import NaturalLanguageUnderstandingV1
 from watson_developer_cloud.natural_language_understanding_v1 import Features, SentimentOptions, EmotionOptions, KeywordsOptions
 
 
-def doNLP(content):
-    _token=['6LtKXgn8XiDZCjAOgr6ibyiyO8yYOXXdwcu4cwKxVUHc','RAXTXY4DOozh-zWFV71yhhJxEP3QIDRNUClfIupJdslC']
-    natural_language_understanding = NaturalLanguageUnderstandingV1(
-        version='2018-03-16',
-        iam_apikey=_token[0],
-        url='https://gateway.watsonplatform.net/natural-language-understanding/api'
-        )
 
-    response = natural_language_understanding.analyze(
-        text=content,
-        features=Features(sentiment=SentimentOptions(),emotion=EmotionOptions(),keywords=KeywordsOptions(sentiment=True,emotion=True,limit=2))).get_result()
-
-    print(json.dumps(response, indent=2))
-    return json.dumps(response, indent=2)
 
 def initDB():
     conn = MySQLdb.connect(host='localhost', port=3306, user='root', passwd='cloudera', db='mysql')
@@ -27,17 +14,39 @@ def updateDB(_cursor,_content, _id):
     # inserting
     # sql="insert News_copy(article_title,article_date,article_content,article_category,article_writer,article_publisher,article_analysis) VALUES (%s, %s, %s,%s,%s,%s,%s);"
     # cursor.execute(sql, ('Parkilgwon', '2018-10-22', 'abc', 'category', 'writer', 'pulisher', json.dumps(response, indent=2)))
-
     sql= "UPDATE News_copy SET article_analysis = %s WHERE id = %s;"
     # if executing succed, it returns 1(True), or 0(False)
     sql_return = cursor.execute(sql, [_content,_id])
-
     if sql_return == 1:
         conn.commit()
-
     return (sql_return == 1)
 
+def countRow(_cursor):
+    sql= "SELECT id, article_content FROM News;"
+    sql_return = cursor.execute(sql)
+    result = cursor.fetchall()
+    return (sql_return)
 
+
+
+def doNLP(_content):
+    _token=['6LtKXgn8XiDZCjAOgr6ibyiyO8yYOXXdwcu4cwKxVUHc','RAXTXY4DOozh-zWFV71yhhJxEP3QIDRNUClfIupJdslC']
+    natural_language_understanding = NaturalLanguageUnderstandingV1(
+        version='2018-03-16',
+        iam_apikey=_token[0],
+        url='https://gateway.watsonplatform.net/natural-language-understanding/api'
+        )
+
+    response = natural_language_understanding.analyze(
+        text=_content,
+        features=Features(sentiment=SentimentOptions(),emotion=EmotionOptions(),keywords=KeywordsOptions(sentiment=True,emotion=True,limit=2))).get_result()
+
+    print(json.dumps(response, indent=2))
+
+    return json.dumps(response, indent=2)
+
+if __name__ == '__main__':
+    cursor = initDB()
 
 
 # document reference
