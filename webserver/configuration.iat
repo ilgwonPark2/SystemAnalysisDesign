@@ -2,7 +2,7 @@ interface test
   port : 4000
   type : "http server"
 
-  on /#: do
+  on /# : do
     File.read!("/home/cloudera/interactor/webserver/index.html")
   exit
 exit
