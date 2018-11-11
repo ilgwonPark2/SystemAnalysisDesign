@@ -32,7 +32,7 @@ def selectDB(_conn):
 
 
 def doNLP(_content):
-    _token = ['6LtKXgn8XiDZCjAOgr6ibyiyO8yYOXXdwcu4cwKxVUHc','RAXTXY4DOozh-zWFV71yhhJxEP3QIDRNUClfIupJdslC']
+    _token = ['6LtKXgn8XiDZCjAOgr6ibyiyO8yYOXXdwcu4cwKxVUHc','RAXTXY4DOozh-zWFV71yhhJxEP3QIDRNUClfIupJdslC','OzV0_RzgoP_fBylANjVrn4qyUSkbnIs9KdR-aXtjgRj-','K5y83nfK6ZUzBv7G509oGsAO7CO1TjoFAPex8Vbcd6vV']
     natural_language_understanding = NaturalLanguageUnderstandingV1(
         version='2018-03-16',
         iam_apikey=_token[0],
@@ -52,10 +52,11 @@ if __name__ == '__main__':
     print(sql_return)
 
     for row in sql_return:
-        json_data = doNLP(row[1])
-        time.sleep(0.5)
+        if row[0].strip() != '':
+            json_data = doNLP(row[1])
+            time.sleep(0.1)
         # have to handle false case.
-        updateDB(conn, json_data, row[0])
+            updateDB(conn, json_data, row[0])
 
 
 
