@@ -11,23 +11,24 @@ def initDB():
     conn = MySQLdb.connect(host='localhost', port=3306, user='root', passwd='cloudera', db='mysql')
     return conn
 
-def updateDB(_conn,_content, _id):
+def updateDB(_conn, _content, _id):
     # inserting
     # sql="insert News_copy(article_title,article_date,article_content,article_category,article_writer,article_publisher,article_analysis) VALUES (%s, %s, %s,%s,%s,%s,%s);"
     # cursor.execute(sql, ('Parkilgwon', '2018-10-22', 'abc', 'category', 'writer', 'pulisher', json.dumps(response, indent=2)))
-    sql= "UPDATE News_copy SET article_analysis = %s WHERE id = %s;"
+    sql= "UPDATE News_analysis SET article_analysis = %s WHERE id = %s;"
     # if executing succed, it returns 1(True), or 0(False)
     sql_return = _conn.cursor().execute(sql, [_content, _id])
-    if sql_return == 1:
-        _conn.commit()
+    _conn.commit()
+    # if sql_return == 1:
+    #     _conn.commit()
     return (sql_return == 1)
 
 def selectDB(_conn):
-    _cusor = conn.cursor()
-    sql = "SELECT id, article_content FROM News;"
-    sql_return = _cusor.execute(sql)
-    result = _cusor.fetchall()
-    return (sql_return)
+    _cursor = _conn.cursor()
+    sql = "SELECT id, article_content FROM News_analysis;"
+    sql_return = _cursor.execute(sql)
+    result = _cursor.fetchall()
+    return (result)
 
 
 def doNLP(_content):
@@ -37,29 +38,34 @@ def doNLP(_content):
         iam_apikey=_token[0],
         url='https://gateway.watsonplatform.net/natural-language-understanding/api'
         )
-
     response = natural_language_understanding.analyze(
         text=_content,
         features=Features(sentiment=SentimentOptions(),emotion=EmotionOptions(),keywords=KeywordsOptions(sentiment=True,emotion=True,limit=2))).get_result()
-
     print(json.dumps(response, indent=2))
-
     return json.dumps(response, indent=2)
 
 
 if __name__ == '__main__':
     conn = initDB()
-
     sql_return = selectDB(conn)
+    _cursor = conn.cursor()
     print(sql_return)
+
     for row in sql_return:
         json_data = doNLP(row[1])
-        sleep(1)
+        time.sleep(0.5)
         # have to handle false case.
-        updateDB(_cursor, row[0], json_data)
+        updateDB(conn, json_data, row[0])
 
 
 
+
+# test
+# for row in sql_return:
+#     json_data = doNLP(row[1])
+#     print(row[0],json_data)
+#     time.sleep(1)
+#     updateDB(conn, json_data, row[0])
 
 
 # document reference
