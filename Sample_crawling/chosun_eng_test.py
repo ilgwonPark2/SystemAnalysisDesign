@@ -42,7 +42,7 @@ def getText(link):
 		date_list[0] = "12"
 	date = date_list[2]+"-"+date_list[0]+"-"+date_list[1]+" "+date_list[3]
 	
-	category = 'north korea'
+	category = 'North Korea'
 	
 	author = soup.find("li",{"id":"j1"}).text.strip()
 	if "By " in author:
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     criteria = time.mktime(d1.timetuple())
     page = 1
     # csv 파일로 저장, filenmae 변수에 파일명 입력
-    filename = 'chosun_1day.csv'
+    filename = 'chosun_1month.csv'
     f = open("sample_data/"+filename, 'w', encoding='utf-8', newline='')
     wr = csv.writer(f)
     wr.writerow(["제목","날짜","분류", "기자" ,"본문"])

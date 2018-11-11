@@ -4,8 +4,8 @@ from datetime import date, timedelta, datetime
 import time
 import urllib
 import sys
-import MySQLdb
-import pymysql
+import csv
+#import MySQLdb
 
 def getText(link):
 	req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
@@ -42,7 +42,7 @@ def getText(link):
 		date_list[0] = "12"
 	date = date_list[2]+"-"+date_list[0]+"-"+date_list[1]+" "+date_list[3]
 	
-	category = 'north korea'
+	category = 'North Korea'
 	
 	author = soup.find("li",{"id":"j1"}).text.strip()
 	if "By " in author:
@@ -60,12 +60,6 @@ def getText(link):
 
 
 if __name__ == '__main__':
-    # db=MySQLdb.connect(host="localhost", user="root",passwd="cloudera",db="mysql")
-    # db.set_character_set('utf8')
-
-    # cursor=db.cursor()
-    #
-    # sql="INSERT "
     d2 = date.today()
     d1 = d2 - timedelta(days=30)
     criteria = time.mktime(d1.timetuple())
@@ -91,12 +85,7 @@ if __name__ == '__main__':
             if (timestamp < criteria):
                 print("시간 범위에 벗어났다")
                 sys.exit()
-            db=pymysql.connect(host='117.17.187.180',port=4100, user='root',password='Cloudera301!',db='mysql')
-            db.set_character_set('utf8')
-            cursor=db.cursor()
-            sql = "INSERT INTO News Values(%s,%s,%s,%s,%s)" % (
-            "'" + article_list[0] + "'", "'" + article_list[1] + "'", "'" + article_list[2] + "'",
-            "'" + article_list[3] + "'", "'" + article_list[4] + "'", "'" + "chosun" + "'")
+            #요기에다가 mysql로 보내는 코드 작성해야합니다
             for i in article_list:
                 print(i)
                 print("---------------------------------------")

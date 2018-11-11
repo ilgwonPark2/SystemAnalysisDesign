@@ -8,6 +8,7 @@ import sys
 #import MySQLdb
 from selenium import webdriver
 import os
+import csv
 #
 
 def getText(link, driver):
@@ -88,6 +89,11 @@ if __name__ == '__main__':
     driver = webdriver.Chrome(base_dir + '/chromeforwindow')
     driver.implicitly_wait(10)
     page = 1
+	# csv 파일로 저장, filenmae 변수에 파일명 입력
+    filename = 'hanGR1month.csv'
+    f = open("sample_data/"+filename, 'w', encoding='utf-8', newline='')
+    wr = csv.writer(f)
+    wr.writerow(["제목","날짜","분류", "기자", "본문"])
     while True:
         # session = requests.Session()
         # session.headers.update({'User-Agent': 'Custom user agent'})
@@ -111,11 +117,13 @@ if __name__ == '__main__':
             timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())
             if (timestamp < criteria):
                 print("시간 범위에 벗어났다")
+                f.close()
                 sys.exit()
             #요기에다가 mysql로 보내는 코드 작성해야합니다
             for i in article_list:
                 print(i)
                 print("---------------------------------------")
+            wr.writerow(article_list)
             print("\n\n\n")
         page = page + 1
         print('\n****** Next page *****\n')
