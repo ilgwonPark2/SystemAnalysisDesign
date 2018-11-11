@@ -5,21 +5,22 @@ import time
 import urllib
 import sys
 
-
 def getText(link):
 	req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
 	webpage = urlopen(req).read()
 	soup = BeautifulSoup(webpage, 'html.parser')
-
 	header_tag = soup.find("h1", {"id": "news_title_text_id"})
 	date_tag = soup.find("div", {"class": "news_date"})
 	content_tag = soup.find("div", {"id": "news_body_id"})
 	header=soup.find("head")
-	category_tag= str(header).split('property=\"article:section\"')
+	category_tag= str(header).split('property=\"article:section\"') 
 	author_tag = str(header).split('property=\"dable:author\"')
 	
 	content_list = content_tag.findAll("div", {"class": "par"})
 	category=category_tag[0].split()[-1][9:-1]
+	if "http://life.chosun.com" in link:
+		category = "라이프"
+		
 	author_list = author_tag[0].split()[-5:]
 	author=""
 	for i in range(len(author_list)):
@@ -48,7 +49,13 @@ def getText(link):
 
 	header = header_tag.text.strip()
 	# 날짜 앞의 입력 스트링 제거
-	date = date_tag.text.strip()[3:19].replace(".","-")
+	date = date_tag.text.strip()[3:].replace(".","-")
+	if ": " in date:
+		date = date.replace(": ","")
+	if "|" in date:
+		date = date.split("|")[0].strip()
+	
+	
 
 	
 	
@@ -58,7 +65,7 @@ def getText(link):
 
 if __name__ == '__main__':
 	d2 = date.today()
-	d1 = d2 - timedelta(days=1)
+	d1 = d2 - timedelta(days=30)
 	criteria = time.mktime(d1.timetuple())
 	page = 1
 	while True:
@@ -86,3 +93,5 @@ if __name__ == '__main__':
 
 		page = page + 1
 		print('\n****** Next page *****\n')
+
+		
