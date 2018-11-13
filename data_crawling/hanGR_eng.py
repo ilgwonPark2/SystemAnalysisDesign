@@ -2,14 +2,12 @@ from bs4 import BeautifulSoup
 from urllib.request import Request, urlopen
 from datetime import date, timedelta, datetime
 import time
-#from sshtunnel import SSHTunnelForwarder
 import urllib
 import sys
-#import MySQLdb
 from selenium import webdriver
 import os
 import pymysql
-#
+
 
 def getText(link, driver):
 	driver.get(link)
@@ -78,10 +76,7 @@ def getText(link, driver):
 	return [header, date, category, author, content]
 
 
-def SQLquery(list):   # ssh=paramiko.SSHClient()
-	# ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    # ssh.connect('117.17.187.180',4900,'cloudera',password='cloudera')
-    # print(ssh)
+def SQLquery(list): 
 	conn = pymysql.connect(host='117.17.187.180', user='root',port=4100,password='cloudera',
                            db='mysql', charset='utf8')
 	curs = conn.cursor()
@@ -95,9 +90,9 @@ if __name__ == '__main__':
     d2 = date.today()
     d1 = d2 - timedelta(days=90)
     criteria = time.mktime(d1.timetuple())
-    # f = open('sample_nocut.txt', mode='wt', encoding='utf-8')
     # 크롬 드라이버 실행
     base_dir = os.getcwd()
+	# if you use window os, change the '/chromedriver' -> '/chromeforwindow.exe'
     driver = webdriver.Chrome(base_dir + '/chromedriver')
     driver.implicitly_wait(10)
     page = 1
