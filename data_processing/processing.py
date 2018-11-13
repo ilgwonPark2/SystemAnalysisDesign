@@ -40,26 +40,30 @@ def doNLP(_content):
             text=_content,
             features=Features(sentiment=SentimentOptions(),emotion=EmotionOptions(),keywords=KeywordsOptions(sentiment=True,emotion=True,limit=3)))
         if response.get_status_code() != 200:
-            raise
+            raise Exception
         _nlp_result = json.dumps(response.get_result(), indent=2)
         _nlp_processed = processNLP(_nlp_result)
-        # print(_nlp_processed)
         # print(response.get_headers())
         # print(response.get_status_code())
     except Exception as e:
         print(e)
         print(e.args)
-        _nlp_processed = ''
+        _nlp_processed = '{"result":"unsupported language"}'
+        return _nlp_processed
     else:
         return _nlp_processed
 
 def processNLP(_nlp_result):
     tmp = json.loads(_nlp_result)
-    tmp['keyword1'] = tmp['keywords'][0]
-    tmp['keyword2'] = tmp['keywords'][1]
-    tmp['keyword3'] = tmp['keywords'][2]
+    for x in range(len(tmp['keywords'])):
+        str_key ='keyword'+str(x+1)
+        if tmp['keywords'][x] != '':
+            tmp[str_key] = tmp['keywords'][x]
+        else:
+            tmp[str_key] = ''
     tmp.pop('keywords')
     _nlp_processed = json.dumps(tmp, indent=2)
+    # print(_nlp_processed)
     return _nlp_processed
 
 
@@ -80,16 +84,6 @@ if __name__ == '__main__':
     print('Finished')
     print('------------------------------------------------')
     print('------------------------------------------------')
-
-# test
-for row in sql_return:
-    if row[0]>579:
-        if row[1].strip() != '':
-            json_data = doNLP(row[1])
-            time.sleep(0.1)
-            print(row[0],json_data)
-            # have to handle false case.
-            updateDB(conn, json_data, row[0])
 
 
 
