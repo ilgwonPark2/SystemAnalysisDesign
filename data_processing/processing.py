@@ -28,7 +28,7 @@ def selectDB(_conn):
     return result
 
 def doNLP(_content):
-    _token = ['6LtKXgn8XiDZCjAOgr6ibyiyO8yYOXXdwcu4cwKxVUHc','RAXTXY4DOozh-zWFV71yhhJxEP3QIDRNUClfIupJdslC','OzV0_RzgoP_fBylANjVrn4qyUSkbnIs9KdR-aXtjgRj-','K5y83nfK6ZUzBv7G509oGsAO7CO1TjoFAPex8Vbcd6vV','TLN3KmCgunKeKIcla_zUAxNf4_R8l7xHYnV419WDV11H']
+    _token = [1,2,3,4]
     # _token_limit = True
     natural_language_understanding = NaturalLanguageUnderstandingV1(
         version='2018-03-16',
