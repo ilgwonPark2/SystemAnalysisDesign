@@ -12,14 +12,14 @@ def getText(link):
 	req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
 	webpage = urlopen(req).read()
 	soup = BeautifulSoup(webpage, 'html.parser')
-
+	head = soup.find("head").find("title")
 	header = soup.find("h1", {"id": "news_title_text_id"}).text.strip()
 
 	date_tag = soup.find("p", {"id": "date_text"})
 	date_list = date_tag.text.strip().replace(",", "").split()
 	if "January" == date_list[0]:
 		date_list[0] = "01"
-	elif "Feburary" == date_list[0]:
+	elif "February" == date_list[0]:
 		date_list[0] = "02"
 	elif "March" == date_list[0]:
 		date_list[0] = "03"
@@ -43,13 +43,13 @@ def getText(link):
 		date_list[0] = "12"
 	date = date_list[2] + "-" + date_list[0] + "-" + date_list[1] + " " + date_list[3]
 
-	category = 'North Korea'
+	category = head.text.split()[-1].strip()
 	try:
 		author = soup.find("li", {"id": "j1"}).text.strip()
 		if "By " in author:
 			author = author.replace("By ", "")
 	except:
-		author='null'
+		author=''
 	content_tag = soup.findAll("div", {"class": "par"})
 	content = ""
 	for tag in content_tag:
@@ -57,7 +57,12 @@ def getText(link):
 		for i in content_list:
 			content += i.text.strip() + " "
 
+	if(len(content) == 0):
+		content = soup.find("div", {"class": "par"}).text.strip()
+	
+
 	return [header, date, category, author, content]
+
 
 
 def SQLquery(list):   # ssh=paramiko.SSHClient()
@@ -69,8 +74,8 @@ def SQLquery(list):   # ssh=paramiko.SSHClient()
 	curs = conn.cursor()
 	now=datetime.strptime(str(article_list[1]),'%Y-%m-%d %H:%M')
 	new_now=now.strftime('%Y-%m-%d %H:%M')
-	sql="INSERT  News (article_title,article_date,article_content,article_category,article_writer,article_publisher) values (%s,%s,%s,%s,%s,%s);"
-	curs.execute(sql,(list[0],new_now ,list[4],list[2],list[3] ,"chosun"))
+	sql="INSERT  News_test (article_title,article_date,artice_content,article_category,article_writer,article_publisher,article_url) values (%s,%s,%s,%s,%s,%s,%s);"
+	curs.execute(sql,(list[0],new_now ,list[4],list[2],list[3] ,"chosun",list[5]))
 	 #리턴값은 튜플
 	conn.commit()
 
@@ -78,29 +83,37 @@ def SQLquery(list):   # ssh=paramiko.SSHClient()
 
 if __name__ == '__main__':
     d2 = date.today()
-    d1 = d2 - timedelta(days=90)
+    d1 = d2 - timedelta(days=1)
     criteria = time.mktime(d1.timetuple())
     page = 1
+    count = 0
     while True:
         req = Request(
-            "http://english.chosun.com/svc/list_in/list.html?catid=F&pn={}".format(page))
+            "http://english.chosun.com/svc/list_in/search.html?query=North+Korea&pn={}".format(page))
         webpage = urlopen(req).read()
         soup = BeautifulSoup(webpage, 'html.parser')
         url_collect = []
         ###Url Crawling
         second_crawl = soup.find("div", {"id": "list_area"}).findAll("dl", {"class": "list_item"})
-
+        print(page)
+        print("\n\n\n")
         for i in second_crawl:
             tag = i.findAll("a")[0]
             for a in tag.findAll(True):
                 a.extract()
-            print('http://english.chosun.com/'+tag.get("href"))
-            article_list = getText('http://english.chosun.com/'+tag.get("href"))
+            print(tag.get("href"))
+            try:	
+                article_list = getText(tag.get("href"))	
+            except:	
+                pass
             #데이트가 범위 밖에 벗어나면 아예 종료 되는 부분
             timestamp = time.mktime(datetime.strptime(article_list[1], '%Y-%m-%d %H:%M').timetuple())
             if (timestamp < criteria):
-                print("시간 범위에 벗어났다")
+                print("시간 범위에 벗어났다")	
+                print(count)								
                 sys.exit()
+            count += 1
+            article_list.append(tag.get("href"))
             SQLquery(article_list)
             for i in article_list:
                 print(i)
