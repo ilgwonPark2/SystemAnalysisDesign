@@ -6,6 +6,7 @@ import time
 import urllib
 import sys
 #import MySQLdb
+import pymysql
 
 
 def getText(link, date_time):
@@ -30,7 +31,18 @@ def getText(link, date_time):
 
 	return [header, date, category, author, content]
 
-
+def SQLquery(list):   # ssh=paramiko.SSHClient()
+	# ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    # ssh.connect('117.17.187.180',4900,'cloudera',password='cloudera')
+    # print(ssh)
+	conn = pymysql.connect(host='117.17.187.180', user='root',port=4100,password='cloudera',
+                           db='mysql', charset='utf8')
+	curs = conn.cursor()
+	now=datetime.strptime(str(article_list[1]),'%Y-%m-%d %H:%M')
+	new_now=now.strftime('%Y-%m-%d %H:%M')
+	sql="INSERT  News (article_title,article_date,article_content,article_category,article_writer,article_publisher) values (%s,%s,%s,%s,%s,%s);"
+	curs.execute(sql,(list[0],new_now ,list[4],list[2],list[3] ,"koreatimes"))
+	conn.commit()
 
 
 
@@ -42,7 +54,7 @@ if __name__ == '__main__':
     #
     # sql="INSERT "
     d2 = date.today()
-    d1 = d2 - timedelta(days=30)
+    d1 = d2 - timedelta(days=90)
     criteria = time.mktime(d1.timetuple())
     page = 1
     while True:
@@ -72,6 +84,7 @@ if __name__ == '__main__':
                 print("시간 범위에 벗어났다")
                 sys.exit()
             #요기에다가 mysql로 보내는 코드 작성해야합니다
+            #SQLquery(article_list)
             for i in article_list:
                 print(i)
                 print("---------------------------------------")
