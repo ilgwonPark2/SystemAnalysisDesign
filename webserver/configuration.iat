@@ -10,7 +10,11 @@ interface test
       file = String.replace("/home/cloudera/seoultech/webserver/" <> $data["path"], "../", "")
       File.read!(file)
     else
-      File.read!("/home/cloudera/seoultech/webserver/index.html")
+      if String.starts_with? $data["path"], "/analysis" do
+        File.read!("/home/cloudera/seoultech/webserver/analysis.html")
+      else
+        File.read!("/home/cloudera/seoultech/webserver/index.html")
+      end
     end
   exit
 exit
