@@ -3,9 +3,10 @@ interface test
   type : "http server"
 
   on /# : do
-    File.read!("/home/cloudera/interactor/webserver/index.html")
+    File.read!("/home/cloudera/seoultech/webserver/index.html")
   exit
   on /analysis : do
-  File.read!("/home/cloudera/interactor/webserver/analysis.html")
+    File.read!("/home/cloudera/seoultech/webserver/analysis.html")
+  exit
 exit
 exit
