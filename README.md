@@ -93,6 +93,58 @@ Execute python file crawling_cleansing.py on **cd /seoultech/data_cleansing**
 
 ## Data Processing
 ### http request for NLP
-1. Before 
+1. Before executing python file, you should install watson developer cloud.
 
+https://github.com/ilgwonPark2/SystemAnalysisDesign/wiki/SRS))IBM-Watson-API-with-blue-mix 
 
+2. Execute python file **processsing.py** on **cd /seoultech/data_processing**
+
+3. It returns the NLP analysis results with id and updates them into DB with mysql. The codes check also an available status of input data and request. 
+
+## Data Visualization
+### Mysql - Logstash - Elasticsearch
+Transport data from mysql to Elasticsearch using logstash
+1. Firstly, download the jdbc driver
+
+**$ ./bin/logstash-plugin install logstash-input-jdbc**
+
+Execute above command in logstash directory
+
+2. Download the mysql-connector:
+
+http://xbib.org/repository/org/xbib/elasticsearch/importer/elasticsearch-jdbc/2.3.4.1/elasticsearch-jdbc-2.3.4.1-dist.zip  
+
+-- Download this zip file and unzip the file. Then, move mysql-connector-java library to the “/logstash/lib” directory.
+
+3. Config the pipeline
+
+Move the test.conf file in git “/pipeline” to the “/logstash/config” directory.
+
+**+ Note: you should change some parts in the test.conf file.**
+
+4. Execute the logstash with test.conf
+
+**$ ./logstash -f ../config/test.conf**
+
+Execute above command in “/logstash/bin” directory.
+
+### Access Kibana Web UI
+Access the Kibana web UI http://localhost:5601 with your browser.
+
+1. Create an index pattern
+
+You should create index pattern firstly through Kibana Web UI 
+
+2. Make your own dashboard through Kibana Web UI
+
+Please, refer to this YouTube video: https://www.youtube.com/watch?v=gQ1c1uILyKI 
+
+### Webserver
+
+As you set the web server, what you need to do is get a html iframe tag from Kibana.
+
+User puts Embedded iframe tag of **Share saved dashboard** in the index.html like below picture.
+
+After you change the iframe tag from Kibana, web server automatically recognizes it.
+
+Finally, go to the web server http://localhost:4000 
