@@ -22,7 +22,7 @@ def updateDB(_conn, _content, _id):
 
 def selectDB(_conn):
     _cursor = _conn.cursor()
-    sql = "SELECT id, article_content FROM News_dec_copy;"
+    sql = "SELECT id, article_content FROM News_dec_copy WHERE id>15668;"
     sql_return = _cursor.execute(sql)
     result = _cursor.fetchall()
     return result
