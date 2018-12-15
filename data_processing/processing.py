@@ -29,7 +29,7 @@ def selectDB(_conn):
 
 def doNLP(_content):
     # Use your own IBM token (replace fake_tokens)
-    _token = ['TLN3KmCgunKeKIcla_zUAxNf4_R8l7xHYnV419WDV11H','fake_token2','fake_token3','fake_token4']
+    _token = ['K5y83nfK6ZUzBv7G509oGsAO7CO1TjoFAPex8Vbcd6vV','fake_token2','fake_token3','fake_token4']
     # _token_limit = True
     natural_language_understanding = NaturalLanguageUnderstandingV1(
         version='2018-03-16',
