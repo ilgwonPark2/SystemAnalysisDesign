@@ -5,4 +5,7 @@ interface test
   on /# : do
     File.read!("/home/cloudera/interactor/webserver/index.html")
   exit
+  on /analysis : do
+  File.read!("/home/cloudera/interactor/webserver/analysis.html")
+exit
 exit
