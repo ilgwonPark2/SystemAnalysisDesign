@@ -3,51 +3,14 @@ interface test
   type : "http server"
 
   on /# : do
-  dir = "/home/cloudera/seoultech/webserver/"
   log $data["path"]
     if String.starts_with? $data["path"], "/static" do
       log "aa"
       path = $data["path"]
-      file = String.replace($dir <> $data["path"], "../", "")
-      log file
+      file = String.replace("/home/cloudera/seoultech/webserver/" <> $data["path"], "../", "")
       File.read!(file)
     else
-      log "bb"
       File.read!("/home/cloudera/seoultech/webserver/index.html")
     end
-  exit
-  on /analysis : do
-    File.read!("/home/cloudera/seoultech/webserver/analysis.html")
-  exit
-  on /static : do
-    File.read!("/home/cloudera/seoultech/webserver/$data['path']")
-  exit
-exit
-
-File.read!("/home/cloudera/seoultech/webserver/static/$data.path")
-
-
-service test
-  on start : do
-    if 3 == 3 do
-      "222"
-    end
-  exit
-exit
-
-service load_file
-  # $1 ~> file name
-  on start
-    file_name = text.replace $1 ../ ""
-    content = map.get $workspace.files $file_name
-    if (is.nil $content) do
-      content = file.read $file_name
-      system.property.write files (map.put $workspace.files $file_name $content)
-      $content
-  exit
-  on load
-    content = file.read $file_name
-    # system.property.write files (map.put $workspace.files $file_name $content)
-    $content
   exit
 exit
