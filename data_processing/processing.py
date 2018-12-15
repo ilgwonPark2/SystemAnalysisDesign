@@ -13,7 +13,7 @@ def updateDB(_conn, _content, _id):
     # inserting
     # sql="insert News_copy(article_title,article_date,article_content,article_category,article_writer,article_publisher,article_analysis) VALUES (%s, %s, %s,%s,%s,%s,%s);"
     # cursor.execute(sql, ('Parkilgwon', '2018-10-22', 'abc', 'category', 'writer', 'pulisher', json.dumps(response, indent=2)))
-    sql= "UPDATE News_interim SET article_analysis = %s WHERE id = %s;"
+    sql= "UPDATE News_dec_copy SET article_analysis = %s WHERE id = %s;"
     # if executing succed, it returns 1(True), or 0(False)
     sql_return = _conn.cursor().execute(sql, [_content, _id])
     if sql_return == 1:
@@ -22,14 +22,14 @@ def updateDB(_conn, _content, _id):
 
 def selectDB(_conn):
     _cursor = _conn.cursor()
-    sql = "SELECT id, article_content FROM News_interim;"
+    sql = "SELECT id, article_content FROM News_dec_copy;"
     sql_return = _cursor.execute(sql)
     result = _cursor.fetchall()
     return result
 
 def doNLP(_content):
     # Use your own IBM token (replace fake_tokens)
-    _token = ['fake_token1','fake_token2','fake_token3','fake_token4']
+    _token = ['RAXTXY4DOozh-zWFV71yhhJxEP3QIDRNUClfIupJdslC','fake_token2','fake_token3','fake_token4']
     # _token_limit = True
     natural_language_understanding = NaturalLanguageUnderstandingV1(
         version='2018-03-16',
