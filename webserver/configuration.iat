@@ -9,7 +9,7 @@ interface test
   File.read!("/home/cloudera/seoultech/webserver/analysis.html")
   exit
   on /static : do
-    File.read!("/home/cloudera/seoultech/webserver/$data.path")
+    File.read!("/home/cloudera/seoultech/webserver/static/$data.path")
   exit
 exit
 exit
