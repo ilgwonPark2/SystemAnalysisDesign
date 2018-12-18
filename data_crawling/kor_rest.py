@@ -56,30 +56,27 @@ if __name__ == '__main__':
     d2 = date.today()
     d1 = d2 - timedelta(days=3650)
     criteria = time.mktime(d1.timetuple())
-    page = 1
+    page = 479
     count = 0
     while True:
         req = Request(
-            "http://www.koreatimes.co.kr/www/sublist_103_{}.html".format(page))
+            "http://www.koreatimes.co.kr/www2/common/search.asp?kwd=inter-Korean&pageNum={}&pageSize=10&category=TOTAL&sort=&startDate=&endDate=&date=all&srchFd=&range=&author=all&authorData=&mysrchFd=".format(page))
         webpage = urlopen(req).read()
         soup = BeautifulSoup(webpage, 'html.parser')
         url_collect = []
         ###Url Crawling
-        second_crawl = soup.find("div", {"class": "section_main_left"}).findAll("div", {"class": "list_article_area"})
-
-        for i in second_crawl:
+        second_crawl = soup.findAll("table", {"width": "100%", "border":"0","cellspacing":"0","cellpadding":"0"})[2].findAll("a")
+        third_crawl = soup.findAll("table", {"width": "100%", "border":"0","cellspacing":"0","cellpadding":"0"})[2].findAll("div")
+        for a, b in zip(second_crawl, third_crawl):
             print(page)
             print(count)
-            date_time=i.findAll("div",{"class":"list_article_byline2"})[0].text
+            date_time=b.text.strip()
             if '|' in date_time:
-                date_time=str(date_time).split('|')[1]
+                date_time=date_time.split('|')[-1].strip()
                 if "\n" in date_time:
                     date_time = date_time.replace("\n","")
-            date_time = date_time.strip()
-            tag = i.findAll("a")[0]
-            for a in tag.findAll(True):
-                a.extract()
-            new_tag='http://www.koreatimes.co.kr'+tag.get("href")
+            date_time = date_time+" 23:59"
+            new_tag=a.get("href")
             print(new_tag)
             try:
                 article_list = getText(new_tag,date_time)
